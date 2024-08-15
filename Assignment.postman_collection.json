@@ -1,0 +1,464 @@
+{
+	"info": {
+		"_postman_id": "d56e8d21-f02c-4eb1-8bc2-825feb02ceaa",
+		"name": "Sat_assignment",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "32326568"
+	},
+	"item": [
+		{
+			"name": "Login",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonDaty=pm.response.json();\r",
+							"pm.environment.set(\"tok\",jsonDaty.token);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\t\"username\": \"admin\",\r\n\t\"password\": \"password123\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://restful-booker.herokuapp.com/auth",
+					"protocol": "https",
+					"host": [
+						"restful-booker",
+						"herokuapp",
+						"com"
+					],
+					"path": [
+						"auth"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetAllData",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://restful-booker.herokuapp.com/booking",
+					"protocol": "https",
+					"host": [
+						"restful-booker",
+						"herokuapp",
+						"com"
+					],
+					"path": [
+						"booking"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CreateData",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonId=pm.response.json();\r",
+							"pm.environment.set(\"id\",jsonId.bookingid);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"var firstName=pm.variables.replaceIn('{{$randomFirstName}}')\r",
+							"var lastName=pm.variables.replaceIn('{{$randomLastName}}')\r",
+							"var totalPrice=pm.variables.replaceIn('{{$randomPrice}}')\r",
+							"const randomBoolean = Math.random() >= 0.5;\r",
+							"const meals = ['Breakfast', 'Lunch', 'Dinner'];\r",
+							"const getRandomMeal=(arr)=>{\r",
+							"    return arr[Math.floor(Math.random() * arr.length)];\r",
+							"}\r",
+							"const moment=require('moment');\r",
+							"const today=moment();\r",
+							"pm.environment.set(\"checkIn\",today.format(\"YYYY-MM-DD\"));\r",
+							"pm.environment.set(\"checkOut\",today.add(2,'d').format(\"YYYY-MM-DD\"));\r",
+							"console.log(moment);\r",
+							"pm.environment.set(\"firstName\",firstName);\r",
+							"pm.environment.set(\"lastName\",lastName);\r",
+							"pm.environment.set(\"totalPrice\",Math.round(totalPrice));\r",
+							"pm.environment.set(\"randomBoolean\", randomBoolean);\r",
+							"pm.environment.set('additionalneeds', getRandomMeal(meals));\r",
+							"\r",
+							"\r",
+							"//for debug\r",
+							"//const random = Math.random();\r",
+							"//console.log(random)\r",
+							"//console.log(firstName);\r",
+							"//console.log(lastName);\r",
+							"//console.log(randomBoolean);\r",
+							"//console.log('Additional Needs:', pm.environment.get('additionalneeds'));\r",
+							"\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\t\"firstname\" : \"{{firstName}}\",\r\n\t\"lastname\" : \"{{lastName}}\",\r\n\t\"totalprice\" : \"{{totalPrice}}\",\r\n\t\"depositpaid\" : {{randomBoolean}},\r\n\t\"bookingdates\" : {\r\n    \t\"checkin\" : \"{{checkIn}}\",\r\n    \t\"checkout\" : \"{{checkOut}}\"\r\n\t},\r\n\t\"additionalneeds\" : \"{{additionalneeds}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://restful-booker.herokuapp.com/booking/",
+					"protocol": "https",
+					"host": [
+						"restful-booker",
+						"herokuapp",
+						"com"
+					],
+					"path": [
+						"booking",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetUnData",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonCode = pm.response.code;\r",
+							"switch (jsonCode) {\r",
+							"    case 200:\r",
+							"        var jsondata = pm.response.json();\r",
+							"\r",
+							"        pm.test(\"first name validation\", function () {\r",
+							"            pm.expect(jsondata.firstname).to.equal(pm.environment.get('firstName'))\r",
+							"        })\r",
+							"        pm.test(\"last name validation\", function () {\r",
+							"            pm.expect(jsondata.lastname).to.equal(pm.environment.get(\"lastName\"));\r",
+							"        })\r",
+							"        pm.test(\"total price validation\", function () {\r",
+							"            pm.expect(jsondata.totalprice).to.equal(pm.environment.get(\"totalPrice\"));\r",
+							"\r",
+							"        })\r",
+							"        pm.test(\"deposite paid validation\", function () {\r",
+							"            pm.expect(jsondata.depositpaid).to.equal(pm.environment.get(\"randomBoolean\"))\r",
+							"        })\r",
+							"\r",
+							"        pm.test(\"verify checkin\", function () {\r",
+							"            pm.expect(jsondata.bookingdates.checkin).to.equal(pm.environment.get(\"checkIn\"))\r",
+							"        })\r",
+							"        pm.test(\"verify checkout\", function () {\r",
+							"            pm.expect(jsondata.bookingdates.checkout).to.equal(pm.environment.get(\"checkOut\"))\r",
+							"        })\r",
+							"        pm.test(\"additionalneeds validation\", function () {\r",
+							"            pm.expect(jsondata.additionalneeds).to.equal(pm.environment.get(\"additionalneeds\"))\r",
+							"        })\r",
+							"        break;\r",
+							"\r",
+							"    case 400:\r",
+							"        pm.test(\"Bad request\")\r",
+							"        break;\r",
+							"    case 404:\r",
+							"        pm.test(\"not found\")\r",
+							"        break;\r",
+							"    case 500:\r",
+							"        pm.test(\"Internel server error\")\r",
+							"        break;\r",
+							"    case 401:\r",
+							"        pm.test(\"Unauthorized\");\r",
+							"        break;\r",
+							"    case 403:\r",
+							"        pm.test(\"Forbidden\")\r",
+							"        break;\r",
+							"    case 405:\r",
+							"        pm.test(\"Method not allowed\");\r",
+							"        break;\r",
+							"    default:\r",
+							"        pm.test(\"Unknown error\");\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://restful-booker.herokuapp.com/booking/{{id}}",
+					"protocol": "https",
+					"host": [
+						"restful-booker",
+						"herokuapp",
+						"com"
+					],
+					"path": [
+						"booking",
+						"{{id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "UpDateData",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"var firstName=pm.variables.replaceIn('{{$randomFirstName}}')\r",
+							"var lastName=pm.variables.replaceIn('{{$randomLastName}}')\r",
+							"var totalPrice=pm.variables.replaceIn('{{$randomPrice}}')\r",
+							"const randomBoolean = Math.random() >= 0.5;\r",
+							"const meals = ['Breakfast', 'Lunch', 'Dinner'];\r",
+							"const getRandomMeal=(arr)=>{\r",
+							"    return arr[Math.floor(Math.random() * arr.length)];\r",
+							"}\r",
+							"const moment=require('moment');\r",
+							"const today=moment();\r",
+							"pm.environment.set(\"checkIn\",today.format(\"YYYY-MM-DD\"));\r",
+							"pm.environment.set(\"checkOut\",today.add(7,'d').format(\"YYYY-MM-DD\"));\r",
+							"console.log(moment);\r",
+							"pm.environment.set(\"firstName\",firstName);\r",
+							"pm.environment.set(\"lastName\",lastName);\r",
+							"pm.environment.set(\"totalPrice\",Math.round(totalPrice));\r",
+							"pm.environment.set(\"randomBoolean\", randomBoolean);\r",
+							"pm.environment.set('additionalneeds', getRandomMeal(meals));"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonCode = pm.response.code;\r",
+							"switch (jsonCode) {\r",
+							"    case 200:\r",
+							"        var jsondata = pm.response.json();\r",
+							"\r",
+							"        pm.test(\"first name validation\", function () {\r",
+							"            pm.expect(jsondata.firstname).to.equal(pm.environment.get('firstName'))\r",
+							"        })\r",
+							"        pm.test(\"last name validation\", function () {\r",
+							"            pm.expect(jsondata.lastname).to.equal(pm.environment.get(\"lastName\"));\r",
+							"        })\r",
+							"        pm.test(\"total price validation\", function () {\r",
+							"            pm.expect(jsondata.totalprice).to.equal(pm.environment.get(\"totalPrice\"));\r",
+							"\r",
+							"        })\r",
+							"        pm.test(\"deposite paid validation\", function () {\r",
+							"            pm.expect(jsondata.depositpaid).to.equal(pm.environment.get(\"randomBoolean\"))\r",
+							"        })\r",
+							"\r",
+							"        pm.test(\"verify checkin\", function () {\r",
+							"            pm.expect(jsondata.bookingdates.checkin).to.equal(pm.environment.get(\"checkIn\"))\r",
+							"        })\r",
+							"        pm.test(\"verify checkout\", function () {\r",
+							"            pm.expect(jsondata.bookingdates.checkout).to.equal(pm.environment.get(\"checkOut\"))\r",
+							"        })\r",
+							"        pm.test(\"additionalneeds validation\", function () {\r",
+							"            pm.expect(jsondata.additionalneeds).to.equal(pm.environment.get(\"additionalneeds\"))\r",
+							"        })\r",
+							"        break;\r",
+							"\r",
+							"    case 400:\r",
+							"        pm.test(\"Bad request\")\r",
+							"        break;\r",
+							"    case 404:\r",
+							"        pm.test(\"not found\")\r",
+							"        break;\r",
+							"    case 500:\r",
+							"        pm.test(\"Internel server error\")\r",
+							"        break;\r",
+							"    case 401:\r",
+							"        pm.test(\"Unauthorized\");\r",
+							"        break;\r",
+							"    case 403:\r",
+							"        pm.test(\"Forbidden\")\r",
+							"        break;\r",
+							"    case 405:\r",
+							"        pm.test(\"Method not allowed\");\r",
+							"        break;\r",
+							"    default:\r",
+							"        pm.test(\"Unknown error\");\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Cookie",
+						"value": "token={{tok}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\t\"firstname\" : \"{{firstName}}\",\r\n\t\"lastname\" : \"{{lastName}}\",\r\n\t\"totalprice\" : \"{{totalPrice}}\",\r\n\t\"depositpaid\" : {{randomBoolean}},\r\n\t\"bookingdates\" : {\r\n    \t\"checkin\" : \"{{checkIn}}\",\r\n    \t\"checkout\" : \"{{checkOut}}\"\r\n\t},\r\n\t\"additionalneeds\" : \"{{additionalneeds}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://restful-booker.herokuapp.com/booking/{{id}}",
+					"protocol": "https",
+					"host": [
+						"restful-booker",
+						"herokuapp",
+						"com"
+					],
+					"path": [
+						"booking",
+						"{{id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DeleteID",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var code=pm.response.code;\r",
+							"switch(code){\r",
+							"    case 200:\r",
+							"    pm.test(\"successfully deleted\");\r",
+							"    break;\r",
+							"    case 404:\r",
+							"    pm.test(\"Found no data!!\");\r",
+							"    break;\r",
+							"    case 403:\r",
+							"    pm.test(\"Forbidden!!\")\r",
+							"    break;\r",
+							"    default:\r",
+							"    pm.test(\"Wrong code \")\r",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Cookie",
+						"value": "token={{tok}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "https://restful-booker.herokuapp.com/booking/{{id}}",
+					"protocol": "https",
+					"host": [
+						"restful-booker",
+						"herokuapp",
+						"com"
+					],
+					"path": [
+						"booking",
+						"{{id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get DleteID",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"\r",
+							"var code=pm.response.code;\r",
+							"switch(code){\r",
+							"    case 404:\r",
+							"    pm.test(\"Data not found\");\r",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://restful-booker.herokuapp.com/booking/{{id}}",
+					"protocol": "https",
+					"host": [
+						"restful-booker",
+						"herokuapp",
+						"com"
+					],
+					"path": [
+						"booking",
+						"{{id}}"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
